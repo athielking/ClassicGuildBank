@@ -18,7 +18,7 @@ stages:
     - task: AzureKeyVault@2
       inputs:
         azureSubscription: 'Pay-As-You-Go(49c5473a-4747-494e-8cfd-1c6671b3b175)'
-        KeyVaultName: 'kmxTerraformKeyVault'
+        KeyVaultName: 'kv-fbi-terraform-secrets'
         SecretsFilter: '*'
         RunAsPreJob: true 
     - script: |
@@ -31,23 +31,21 @@ stages:
       displayName: "Terraform Plan"
       env:
         TF_VAR_sql_admin_password: $(SQL_ADMIN_PASSWORD)
-        ARM_ACCESS_KEY: $(ArmAccessKey)
-        ARM_CLIENT_ID: $(ArmClientId)
-        ARM_CLIENT_SECRET: $(ArmClientSecret)
-        ARM_SUBSCRIPTION_ID: $(ArmSubscriptionId)
-        ARM_TENANT_ID: $(ArmTenantId)
-        AWS_ACCESS_KEY: $(AwsAccessKey)
-        AWS_SECRET_ACCESS_KEY: $(AwsSecretAccesskey)
+        ARM_CLIENT_ID: $(ARMClientId)
+        ARM_CLIENT_SECRET: $(ARMClientSecret)
+        ARM_SUBSCRIPTION_ID: $(ARMSubscriptionId)
+        ARM_TENANT_ID: $(ARMTenantId)
+        AWS_ACCESS_KEY: $(AWSAccessKey)
+        AWS_SECRET_ACCESS_KEY: $(AWSSecretkey)
     - script: terraform apply -input=false "$(Build.StagingDirectory)/terraform-plans/tf.plan"
       displayName: "Terraform Apply"
       env:        
-        ARM_ACCESS_KEY: $(ArmAccessKey)
-        ARM_CLIENT_ID: $(ArmClientId)
-        ARM_CLIENT_SECRET: $(ArmClientSecret)
-        ARM_SUBSCRIPTION_ID: $(ArmSubscriptionId)
-        ARM_TENANT_ID: $(ArmTenantId)
-        AWS_ACCESS_KEY: $(AwsAccessKey)
-        AWS_SECRET_ACCESS_KEY: $(AwsSecretAccesskey)
+        ARM_CLIENT_ID: $(ARMClientId)
+        ARM_CLIENT_SECRET: $(ARMClientSecret)
+        ARM_SUBSCRIPTION_ID: $(ARMSubscriptionId)
+        ARM_TENANT_ID: $(ARMTenantId)
+        AWS_ACCESS_KEY: $(AWSAccessKey)
+        AWS_SECRET_ACCESS_KEY: $(AWSSecretkey)
 - stage: Build
   jobs:
   - job: BuildApi
@@ -143,7 +141,7 @@ stages:
     - task: AzureKeyVault@2
       inputs:
         azureSubscription: 'Pay-As-You-Go(49c5473a-4747-494e-8cfd-1c6671b3b175)'
-        KeyVaultName: 'kmxTerraformKeyVault'
+        KeyVaultName: 'kv-fbi-terraform-secrets'
         SecretsFilter: '*'
         RunAsPreJob: true 
     - task: DownloadBuildArtifacts@1
@@ -180,8 +178,8 @@ stages:
         echo "##vso[task.setvariable variable=CLOUDFRONT_DISTRIBUTION]$dist_id"
       displayName: "Get Cloudfront Distribution"
       env:
-        AWS_SECRET_ACCESS_KEY: $(AwsSecretAccessKey)
-        AWS_ACCESS_KEY_ID: $(AwsAccessKey)
+        AWS_SECRET_ACCESS_KEY: $(AWSSecretKey)
+        AWS_ACCESS_KEY_ID: $(AWSAccessKey)
     - task: AWSCLI@1
       inputs:
         awsCredentials: 'aws-501software'
