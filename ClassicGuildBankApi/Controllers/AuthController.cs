@@ -98,6 +98,7 @@ namespace ClassicGuildBankApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Exception thrown while logging in: {ex}");
+                return BadRequest(new { errorMessage = ex.Message } );
             }
 
             return BadRequest(new { errorMessage = "Failed to login" } );
