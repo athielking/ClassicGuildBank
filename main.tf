@@ -46,8 +46,8 @@ locals {
   # IP Addresses allowed to access Sql Server
   allowed_ips = [
     {
-      start = "23.28.20.0"
-      end   = "23.28.20.255"
+      start = "96.27.255.0"
+      end   = "96.27.255.255"
     }
   ]
 }
@@ -105,35 +105,35 @@ resource "azurerm_mssql_database" "db" {
   depends_on = [ azurerm_mssql_server.db_server ]
 }
 
-resource "null_resource" "db_schema" {
-  triggers = {
-    sql_hash = filemd5("./ClassicGuildBankData/SQL/schema.sql")
-  }
-  provisioner "local-exec" {
-    command = "${local.sqlcmd_base} -i ./ClassicGuildBankData/SQL/schema.sql"
-  }
-  depends_on = [azurerm_mssql_database.db]
-}
+# resource "null_resource" "db_schema" {
+#   triggers = {
+#     sql_hash = filemd5("./ClassicGuildBankData/SQL/schema.sql")
+#   }
+#   provisioner "local-exec" {
+#     command = "${local.sqlcmd_base} -i ./ClassicGuildBankData/SQL/schema.sql"
+#   }
+#   depends_on = [azurerm_mssql_database.db]
+# }
 
-resource "null_resource" "seed_items" {
-  triggers = {
-    sql_hash = filemd5("./ClassicGuildBankData/SQL/seed_items.sql")
-  }
-  provisioner "local-exec" {
-    command = "${local.sqlcmd_base} -i ./ClassicGuildBankData/SQL/seed_items.sql"
-  }
-  depends_on = [null_resource.db_schema]
-}
+# resource "null_resource" "seed_items" {
+#   triggers = {
+#     sql_hash = filemd5("./ClassicGuildBankData/SQL/seed_items.sql")
+#   }
+#   provisioner "local-exec" {
+#     command = "${local.sqlcmd_base} -i ./ClassicGuildBankData/SQL/seed_items.sql"
+#   }
+#   depends_on = [null_resource.db_schema]
+# }
 
-resource "null_resource" "seed_users" {
-  triggers = {
-    sql_hash = filemd5("./ClassicGuildBankData/SQL/seed_users.sql")
-  }
-  provisioner "local-exec" {
-    command = "${local.sqlcmd_base} -i ./ClassicGuildBankData/SQL/seed_users.sql"
-  }
-  depends_on = [null_resource.seed_items]
-}
+# resource "null_resource" "seed_users" {
+#   triggers = {
+#     sql_hash = filemd5("./ClassicGuildBankData/SQL/seed_users.sql")
+#   }
+#   provisioner "local-exec" {
+#     command = "${local.sqlcmd_base} -i ./ClassicGuildBankData/SQL/seed_users.sql"
+#   }
+#   depends_on = [null_resource.seed_items]
+# }
 
 # Create the Azure App Service Plan
 resource "azurerm_service_plan" "app_sp" {
