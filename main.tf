@@ -83,6 +83,7 @@ resource "azurerm_mssql_firewall_rule" "db_allow_azure" {
   server_id        = azurerm_mssql_server.db_server.id
   start_ip_address = "0.0.0.0"
   end_ip_address   = "0.0.0.0"
+  depends_on = [ azurerm_mssql_server.db_server ]
 }
 
 # Create a firewall rule to allow local access to sql
@@ -92,6 +93,7 @@ resource "azurerm_mssql_firewall_rule" "allow_ip_block" {
   server_id        = azurerm_mssql_server.db_server.id
   start_ip_address = local.allowed_ips[count.index].start
   end_ip_address   = local.allowed_ips[count.index].end
+  depends_on = [ azurerm_mssql_server.db_server ]
 }
 
 # Create the SQL Database
