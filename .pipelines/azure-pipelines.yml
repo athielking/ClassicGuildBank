@@ -40,6 +40,7 @@ stages:
         ARM_TENANT_ID: $(ARMTenantId)
         AWS_ACCESS_KEY: $(AWSAccessKey)
         AWS_SECRET_ACCESS_KEY: $(AWSSecretkey)
+        CLOUDFLARE_API_TOKEN: $(CloudflareApiToken)
     - script: terraform apply -input=false "$(Build.StagingDirectory)/terraform-plans/tf.plan"
       displayName: "Terraform Apply"
       env:        
@@ -49,6 +50,7 @@ stages:
         ARM_TENANT_ID: $(ARMTenantId)
         AWS_ACCESS_KEY: $(AWSAccessKey)
         AWS_SECRET_ACCESS_KEY: $(AWSSecretkey)
+        CLOUDFLARE_API_TOKEN: $(CloudflareApiToken)
 - stage: Build
   jobs:
   - job: BuildApi
