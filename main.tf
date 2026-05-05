@@ -137,7 +137,7 @@ resource "azurerm_windows_web_app" "app_svc" {
 
     application_stack {
       current_stack  = "dotnet"
-      dotnet_version = "v10.0"
+      dotnet_version = "v6.0"
     }
   }
 }
@@ -245,7 +245,7 @@ data "cloudflare_zone" "dns_zone" {
 resource "cloudflare_dns_record" "example_dns_record" {
   zone_id = data.cloudflare_zone.dns_zone.id
   name = "classicguildbank"
-  ttl = 3600
+  ttl = 1
   type = "CNAME"
   comment = "Classic Guild Bank"
   content = aws_cloudfront_distribution.s3_distribution.domain_name
