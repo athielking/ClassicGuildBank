@@ -173,7 +173,7 @@ resource "azurerm_windows_web_app" "app_svc" {
 
     application_stack {
       current_stack  = "dotnet"
-      dotnet_version = "v6.0"
+      dotnet_version = "v10.0"
     }
   }
 }
