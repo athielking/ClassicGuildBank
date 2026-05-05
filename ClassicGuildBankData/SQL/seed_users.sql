@@ -4,7 +4,7 @@
 -- Idempotent - safe to run multiple times.
 -- =============================================================================
 
-DECLARE @PasswordHash  NVARCHAR(MAX) = N'AQAAAAEAACcQAAAAEEsXCOIo5lyFGVDqKAtkv2gLWoUXrwWxy6xdjUyZm/qF7A2I1r8o7/Ix7wxTQqsdWQ==';
+DECLARE @PasswordHash  NVARCHAR(MAX) = N'AQAAAAIAAYagAAAAEASl15EDMd62Fn5aDgQ/SHtSeiyp8Gm+fTNiNZIKlzdRm5iP2WGSZ8oB+V8SXrs18w==';
 DECLARE @UserId        NVARCHAR(450) = N'00000001-0000-0000-0000-000000000001';
 DECLARE @GuildId       UNIQUEIDENTIFIER = '72D8FD17-9D7B-47E3-882E-E81CD8FB91D0';
 DECLARE @CharacterId   UNIQUEIDENTIFIER = '1A6C7066-F013-4378-AA56-24C53F963288';
