@@ -57,7 +57,7 @@ stages:
     steps:
     - task: UseDotNet@2
       inputs:
-        version: '6.x'
+        version: '10.x'
     - task: DotNetCoreCLI@2
       displayName: "dotnet restore"
       inputs:
