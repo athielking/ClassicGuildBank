@@ -90,8 +90,8 @@ namespace SSIndustrialApi
 
             services.AddMvc(options =>
             {
-                if (_hostingEnvironment.IsProduction())
-                    options.Filters.Add(new RequireHttpsAttribute());
+                // if (_hostingEnvironment.IsProduction())
+                //     options.Filters.Add(new RequireHttpsAttribute());
             }).AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
