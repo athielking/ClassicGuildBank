@@ -97,6 +97,7 @@ resource "azurerm_mssql_database" "db" {
   name      = "${azurerm_resource_group.rg.name}-db"
   server_id = azurerm_mssql_server.db_server.id
   sku_name  = "Basic"
+  depends_on = [ azurerm_mssql_server.db_server ]
 }
 
 # Create the Azure App Service Plan
