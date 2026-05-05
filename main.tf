@@ -107,30 +107,30 @@ resource "azurerm_mssql_database" "db" {
 
 resource "null_resource" "db_schema" {
   triggers = {
-    sql_hash = filemd5("../ClassicGuildBankData/SQL/schema.sql")
+    sql_hash = filemd5("./ClassicGuildBankData/SQL/schema.sql")
   }
   provisioner "local-exec" {
-    command = "${local.sqlcmd_base} -i ../ClassicGuildBankData/SQL/schema.sql"
+    command = "${local.sqlcmd_base} -i ./ClassicGuildBankData/SQL/schema.sql"
   }
   depends_on = [azurerm_mssql_database.db]
 }
 
 resource "null_resource" "seed_items" {
   triggers = {
-    sql_hash = filemd5("../ClassicGuildBankData/SQL/seed_items.sql")
+    sql_hash = filemd5("./ClassicGuildBankData/SQL/seed_items.sql")
   }
   provisioner "local-exec" {
-    command = "${local.sqlcmd_base} -i ../ClassicGuildBankData/SQL/seed_items.sql"
+    command = "${local.sqlcmd_base} -i ./ClassicGuildBankData/SQL/seed_items.sql"
   }
   depends_on = [null_resource.db_schema]
 }
 
 resource "null_resource" "seed_users" {
   triggers = {
-    sql_hash = filemd5("../ClassicGuildBankData/SQL/seed_users.sql")
+    sql_hash = filemd5("./ClassicGuildBankData/SQL/seed_users.sql")
   }
   provisioner "local-exec" {
-    command = "${local.sqlcmd_base} -i ../ClassicGuildBankData/SQL/seed_users.sql"
+    command = "${local.sqlcmd_base} -i ./ClassicGuildBankData/SQL/seed_users.sql"
   }
   depends_on = [null_resource.seed_items]
 }
