@@ -2,24 +2,35 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "3.0.2"
+      version = "4.71.0"
     }
 
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 6.0"
+    }
+
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "5.19.0"
     }
   }
 
   backend "azurerm" {
-    storage_account_name = "kmxterraformbackend"
+    use_azuread_auth     = true
+    storage_account_name = "fbiterraformbackend"
     container_name       = "terraform"
     key                  = "terraform.tfstate"
+    resource_group_name  = "rg-fbi-terraform"
   }
 }
 
+provider "cloudflare" {
+}
+
 provider "azurerm" {
-  features {}
+  features {
+  }
 }
 
 provider "aws" {
@@ -60,7 +71,7 @@ resource "azurerm_mssql_server" "db_server" {
   administrator_login_password = local.sql_admin_password
   azuread_administrator {
     login_username = "athielking@gmail.com"
-    object_id      = "3a4f0f5d-65fa-48cf-a1cc-9e62d351b76a"
+    object_id      = "0084b44c-4311-46a1-973c-9f40b8e65ad1"
   }
 }
 
@@ -126,7 +137,7 @@ resource "azurerm_windows_web_app" "app_svc" {
 
     application_stack {
       current_stack  = "dotnet"
-      dotnet_version = "v6.0"
+      dotnet_version = "v10.0"
     }
   }
 }
@@ -179,13 +190,7 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
   policy = data.aws_iam_policy_document.policy.json
 }
 
-data "aws_acm_certificate" "cert" {
-  domain   = "*.thielking.dev"
-  statuses = ["ISSUED"]
-}
-
 resource "aws_cloudfront_distribution" "s3_distribution" {
-  aliases = [local.dns_name]
 
   origin {
     domain_name = aws_s3_bucket.b.bucket_regional_domain_name
@@ -211,8 +216,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 
   viewer_certificate {
-    acm_certificate_arn = data.aws_acm_certificate.cert.arn
-    ssl_support_method  = "sni-only"
+    cloudfront_default_certificate = true    
   }
 
   restrictions {
@@ -233,17 +237,18 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 # ------------------------------------------------------------------------------
 
 # Import existing DNS Zone as Data.  This is not managed by this terraform deployment
-data "azurerm_dns_zone" "dns" {
-  name                = "thielking.dev"
-  resource_group_name = "TerraformPrereqs"
+data "cloudflare_zone" "dns_zone" {
+  zone_id = "d7e91e43d2066585660e2ae39248896d"
 }
 
 # Create a DNS record to point to our CDN Enpoint
-resource "azurerm_dns_cname_record" "cname" {
-  name                = lower(azurerm_resource_group.rg.name)
-  zone_name           = data.azurerm_dns_zone.dns.name
-  resource_group_name = data.azurerm_dns_zone.dns.resource_group_name
-  ttl                 = 3600
-  record              = aws_cloudfront_distribution.s3_distribution.domain_name
+resource "cloudflare_dns_record" "example_dns_record" {
+  zone_id = data.cloudflare_zone.dns_zone.id
+  name = "classicguildbank"
+  ttl = 3600
+  type = "CNAME"
+  comment = "Classic Guild Bank"
+  content = aws_cloudfront_distribution.s3_distribution.domain_name
+  proxied = true
 }
 
