@@ -63,12 +63,14 @@ resource "azurerm_resource_group" "rg" {
 
 # Create SQL Server
 resource "azurerm_mssql_server" "db_server" {
-  name                         = lower("${azurerm_resource_group.rg.name}-sql")
-  resource_group_name          = azurerm_resource_group.rg.name
-  location                     = azurerm_resource_group.rg.location
-  version                      = "12.0"
-  administrator_login          = "terraformadmin"
-  administrator_login_password = local.sql_admin_password
+  name                          = lower("${azurerm_resource_group.rg.name}-sql")
+  resource_group_name           = azurerm_resource_group.rg.name
+  location                      = azurerm_resource_group.rg.location
+  version                       = "12.0"
+  administrator_login           = "terraformadmin"
+  administrator_login_password  = local.sql_admin_password
+  public_network_access_enabled = true
+
   azuread_administrator {
     login_username = "athielking@gmail.com"
     object_id      = "0084b44c-4311-46a1-973c-9f40b8e65ad1"
