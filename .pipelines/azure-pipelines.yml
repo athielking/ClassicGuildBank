@@ -3,8 +3,7 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-trigger:
-- master
+trigger: none
 
 pool:
   vmImage: ubuntu-latest
@@ -18,12 +17,19 @@ stages:
   jobs:
   - job: Terraform
     steps:
+    - task: TerraformInstaller@1
+      displayName: Install Terraform 1.12.2
+      inputs:
+        terraformVersion: 1.12.2
     - script: |
         mkdir "$(Build.StagingDirectory)/terraform-plans"
         terraform init
       displayName: "Terraform Init"
       env:
-        ARM_ACCESS_KEY: $(ArmAccessKey)
+        ARM_CLIENT_ID: $(ARMClientId)
+        ARM_CLIENT_SECRET: $(ARMClientSecret)
+        ARM_SUBSCRIPTION_ID: $(ARMSubscriptionId)
+        ARM_TENANT_ID: $(ARMTenantId)
     - script: terraform plan -out "$(Build.StagingDirectory)/terraform-plans/tf.plan"
       displayName: "Terraform Plan"
       env:
