@@ -195,6 +195,11 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
   policy = data.aws_iam_policy_document.policy.json
 }
 
+data "aws_acm_certificate" "cert" {
+  domain   = "*.thielking.dev"
+  statuses = ["ISSUED"]
+}
+
 resource "aws_cloudfront_distribution" "s3_distribution" {
 
   origin {
@@ -223,7 +228,8 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   aliases = [ local.dns_name ]
 
   viewer_certificate {
-    cloudfront_default_certificate = true    
+    acm_certificate_arn = data.aws_acm_certificate.cert.arn
+    ssl_support_method  = "sni-only"
   }
 
   restrictions {
