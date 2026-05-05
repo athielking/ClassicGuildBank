@@ -9,18 +9,15 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+- group: TerraformSecrets
+
 stages:
 - stage: Infrastructure
   condition: ne(variables['Build.Reason'], 'PullRequest')
   jobs:
   - job: Terraform
     steps:
-    - task: AzureKeyVault@2
-      inputs:
-        azureSubscription: 'Pay-As-You-Go(49c5473a-4747-494e-8cfd-1c6671b3b175)'
-        KeyVaultName: 'kv-fbi-terraform-secrets'
-        SecretsFilter: '*'
-        RunAsPreJob: true 
     - script: |
         mkdir "$(Build.StagingDirectory)/terraform-plans"
         terraform init
@@ -30,7 +27,7 @@ stages:
     - script: terraform plan -out "$(Build.StagingDirectory)/terraform-plans/tf.plan"
       displayName: "Terraform Plan"
       env:
-        TF_VAR_sql_admin_password: $(SQL_ADMIN_PASSWORD)
+        TF_VAR_sql_admin_password: $(SqlAdminPassword)
         ARM_CLIENT_ID: $(ARMClientId)
         ARM_CLIENT_SECRET: $(ARMClientSecret)
         ARM_SUBSCRIPTION_ID: $(ARMSubscriptionId)
@@ -118,32 +115,26 @@ stages:
     - task: AzureAppServiceManage@0
       displayName: "Stop App Service"
       inputs:
-        azureSubscription: 'Pay-As-You-Go(49c5473a-4747-494e-8cfd-1c6671b3b175)'
+        azureSubscription: 'entra-id-terraform-sp'
         Action: 'Stop Azure App Service'
         WebAppName: 'ClassicGuildBank-api'
     - task: AzureRmWebAppDeployment@4
       displayName: "App Svc Deploy"
       inputs:
         ConnectionType: 'AzureRM'
-        azureSubscription: 'Pay-As-You-Go(49c5473a-4747-494e-8cfd-1c6671b3b175)'
+        azureSubscription: 'entra-id-terraform-sp'
         appType: 'webApp'
         WebAppName: 'ClassicGuildBank-api'
         packageForLinux: '$(System.ArtifactsDirectory)/_ClassicGuildBank/drop/ClassicGuildBankApi'
     - task: AzureAppServiceManage@0
       displayName: "Start App Service"
       inputs:
-        azureSubscription: 'Pay-As-You-Go(49c5473a-4747-494e-8cfd-1c6671b3b175)'
+        azureSubscription: 'entra-id-terraform-sp'
         Action: 'Start Azure App Service'
         WebAppName: 'ClassicGuildBank-api'
   - job: DeployClient
     dependsOn: []
-    steps:    
-    - task: AzureKeyVault@2
-      inputs:
-        azureSubscription: 'Pay-As-You-Go(49c5473a-4747-494e-8cfd-1c6671b3b175)'
-        KeyVaultName: 'kv-fbi-terraform-secrets'
-        SecretsFilter: '*'
-        RunAsPreJob: true 
+    steps:
     - task: DownloadBuildArtifacts@1
       inputs:
         buildType: 'current'
