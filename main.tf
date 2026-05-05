@@ -42,6 +42,7 @@ locals {
   resource_group_location = var.resource_group_location
   sql_admin_password      = var.sql_admin_password
   dns_name                = "classicguildbank.thielking.dev"
+  sqlcmd_base             = "sqlcmd -S ${azurerm_mssql_server.db_server.fully_qualified_domain_name} -d ${azurerm_mssql_database.db.name} -U terraformadmin -P '${var.sql_admin_password}'"
   # IP Addresses allowed to access Sql Server
   allowed_ips = [
     {
@@ -102,6 +103,36 @@ resource "azurerm_mssql_database" "db" {
   server_id = azurerm_mssql_server.db_server.id
   sku_name  = "Basic"
   depends_on = [ azurerm_mssql_server.db_server ]
+}
+
+resource "null_resource" "db_schema" {
+  triggers = {
+    sql_hash = filemd5("../ClassicGuildBankData/SQL/schema.sql")
+  }
+  provisioner "local-exec" {
+    command = "${local.sqlcmd_base} -i ../ClassicGuildBankData/SQL/schema.sql"
+  }
+  depends_on = [azurerm_mssql_database.db]
+}
+
+resource "null_resource" "seed_items" {
+  triggers = {
+    sql_hash = filemd5("../ClassicGuildBankData/SQL/seed_items.sql")
+  }
+  provisioner "local-exec" {
+    command = "${local.sqlcmd_base} -i ../ClassicGuildBankData/SQL/seed_items.sql"
+  }
+  depends_on = [null_resource.db_schema]
+}
+
+resource "null_resource" "seed_users" {
+  triggers = {
+    sql_hash = filemd5("../ClassicGuildBankData/SQL/seed_users.sql")
+  }
+  provisioner "local-exec" {
+    command = "${local.sqlcmd_base} -i ../ClassicGuildBankData/SQL/seed_users.sql"
+  }
+  depends_on = [null_resource.seed_items]
 }
 
 # Create the Azure App Service Plan
