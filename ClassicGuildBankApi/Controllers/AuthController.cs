@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -91,7 +92,8 @@ namespace ClassicGuildBankApi.Controllers
                     }
 
                     return Ok(new { token = GenerateJwtToken(user) });
-                }                
+                }
+                return BadRequest(JsonConvert.SerializeObject(result));                
             }
             catch (Exception ex)
             {
