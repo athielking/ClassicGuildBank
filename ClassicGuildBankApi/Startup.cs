@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -30,13 +31,13 @@ namespace SSIndustrialApi
 
         private readonly IConfiguration _configuration;
 
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly IWebHostEnvironment _hostingEnvironment;
 
         #endregion
 
         #region Constructor
 
-        public Startup(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
+        public Startup(IConfiguration configuration, IWebHostEnvironment hostingEnvironment)
         {
             _configuration = configuration;
             _hostingEnvironment = hostingEnvironment;
@@ -90,10 +91,10 @@ namespace SSIndustrialApi
             {
                 if (_hostingEnvironment.IsProduction())
                     options.Filters.Add(new RequireHttpsAttribute());
-            }).AddJsonOptions(jsonOptions =>
+            }).AddNewtonsoftJson(options =>
             {
-                jsonOptions.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
 
             services.AddDbContext<ClassicGuildBankDbContext>( options => options.UseSqlServer(_configuration.GetConnectionString("ClassicGuildBankDb")));
 
@@ -106,15 +107,8 @@ namespace SSIndustrialApi
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var url = _configuration.GetValue<string>("ClientUrl");
-            app.UseCors(
-                    options => options.WithOrigins(url.Substring(0, url.IndexOf("/#")))
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials());
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -125,16 +119,25 @@ namespace SSIndustrialApi
             }
 
             app.UseHttpsRedirection();
+            app.UseRouting();
+
+            var url = _configuration.GetValue<string>("ClientUrl");
+            app.UseCors(
+                    options => options.WithOrigins(url.Substring(0, url.IndexOf("/#")))
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials());
 
             //app.UseMiddleware<JWTCookieMiddleware>();
 
             app.UseAuthentication();
+            app.UseAuthorization();
 
-            app.UseMvc(routes =>
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         } 
 

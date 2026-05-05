@@ -64,7 +64,7 @@ namespace WowheadItemSeeder
             var conn = bankDb.Database.GetDbConnection();
             if (conn.State != System.Data.ConnectionState.Open)
                 conn.Open();
-            bankDb.Database.ExecuteSqlCommand("SET IDENTITY_INSERT Item ON;");
+            bankDb.Database.ExecuteSqlRaw("SET IDENTITY_INSERT Item ON;");
 
             var deserializer = new XmlSerializer(typeof(Wowhead));
 

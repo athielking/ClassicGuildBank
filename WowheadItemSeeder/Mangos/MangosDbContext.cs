@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
-using MySql.Data.EntityFrameworkCore.Extensions;
 
 namespace WowheadItemSeeder.Mangos
 {
@@ -12,7 +9,7 @@ namespace WowheadItemSeeder.Mangos
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySQL("server=localhost;database=classicmangos;user=root;password=P@ssw0rd!");
+            optionsBuilder.UseMySql("server=localhost;database=classicmangos;user=root;password=P@ssw0rd!", new MySqlServerVersion(new Version(8, 0, 0)));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -40,6 +40,11 @@ namespace ClassicGuildBankData.Data
             _configuration = config;
         }
 
+        public ClassicGuildBankDbContext(DbContextOptions<ClassicGuildBankDbContext> options, IConfiguration config) : base(options)
+        {
+            _configuration = config;
+        }
+
         #endregion
 
         #region Overrides
