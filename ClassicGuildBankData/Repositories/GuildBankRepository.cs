@@ -158,7 +158,7 @@ namespace ClassicGuildBankData.Repositories
 
         public IEnumerable<Character> GetCharacters(Guid guildId, ClassicGuildBankUser classicGuildBankUser)
         {
-            return _classicGuildBankDbContext.Guilds
+            var guild = _classicGuildBankDbContext.Guilds
                 .Include(guild => guild.GuildMembers)
                 .Include(guild => guild.Characters)
                     .ThenInclude(character => character.Bags)
@@ -168,8 +168,9 @@ namespace ClassicGuildBankData.Repositories
                     .ThenInclude(character => character.Bags)
                     .ThenInclude(bag => bag.BagItem)
                 .Where(guild => guild.Id == guildId && guild.GuildMembers.Any(gm => gm.UserId == classicGuildBankUser.Id))
-                .SingleOrDefault()
-                .Characters;
+                .SingleOrDefault();
+
+            return guild?.Characters ?? Enumerable.Empty<Character>();
         }
 
         public void UpdateGuildCharacter(Character character, Guid guildId, ClassicGuildBankUser classicGuildBankUser)
@@ -283,12 +284,13 @@ namespace ClassicGuildBankData.Repositories
         {
             var guilds = _classicGuildBankDbContext.Guilds
                 .Include(guild => guild.GuildMembers)
-                .Where(guild => guild.UserId == classicGuildBankUser.Id || guild.GuildMembers.Any(member => member.UserId == classicGuildBankUser.Id));
+                .Where(guild => guild.UserId == classicGuildBankUser.Id || guild.GuildMembers.Any(member => member.UserId == classicGuildBankUser.Id))
+                .ToList();
 
             foreach (var guild in guilds)
             {
                 guild.UserIsOwner = guild.UserId == classicGuildBankUser.Id;
-                guild.IsSelected = guild.IsSelected = classicGuildBankUser.LastSelectedGuildId == guild.Id;
+                guild.IsSelected = classicGuildBankUser.LastSelectedGuildId == guild.Id;
                 guild.UserCanUpload = guild.UserIsOwner || guild.GuildMembers.Any(member => member.UserId == classicGuildBankUser.Id && member.CanUpload);
             }
 
@@ -461,7 +463,9 @@ namespace ClassicGuildBankData.Repositories
             var queryable = _classicGuildBankDbContext.BagSlots
               .Include(b => b.Bag)
               .ThenInclude(g => g.Character)
+              .Include(b => b.Item)
               .Where(b => b.ItemId != null && b.Bag.Character.GuildId == guildId)
+              .AsEnumerable()
               .GroupBy(b => b.Item)
               .Select(g => new ItemListViewModel() { Item = g.Key, Quantity = g.Sum(b => b.Quantity) });
 
@@ -523,7 +527,7 @@ namespace ClassicGuildBankData.Repositories
         {
             var transaction = new Transaction()
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 GuildId = guildId,
                 CharacterName = depositGroup.Key,
                 TransactionDate = DateTime.Now,
@@ -546,7 +550,7 @@ namespace ClassicGuildBankData.Repositories
                 {
                     transactionDetail = new TransactionDetail()
                     {
-                        Id = new Guid(),
+                        Id = Guid.NewGuid(),
                         ItemId = deposit.ItemId,
                         TransactionId = transaction.Id
                     };
@@ -562,7 +566,7 @@ namespace ClassicGuildBankData.Repositories
         {
             var transaction = new Transaction()
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 GuildId = itemRequest.GuildId,
                 CharacterName = itemRequest.CharacterName,
                 TransactionDate = DateTime.Now,
@@ -576,7 +580,7 @@ namespace ClassicGuildBankData.Repositories
             {
                 var transactionDetail = new TransactionDetail()
                 {
-                    Id = new Guid(),
+                    Id = Guid.NewGuid(),
                     ItemId = itemRequestDetail.ItemId,
                     TransactionId = transaction.Id,
                     Quantity = itemRequestDetail.Quantity

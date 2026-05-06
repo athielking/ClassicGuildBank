@@ -92,13 +92,11 @@ namespace ClassicGuildBankApi.Controllers
                     }
 
                     return Ok(new { token = GenerateJwtToken(user) });
-                }
-                return BadRequest(JsonConvert.SerializeObject(result));                
+                }                
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception thrown while logging in: {ex}");
-                return BadRequest(new { errorMessage = ex.Message } );
+                _logger.LogError($"Exception thrown while logging in: {ex}");                
             }
 
             return BadRequest(new { errorMessage = "Failed to login" } );
