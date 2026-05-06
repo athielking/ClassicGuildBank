@@ -126,7 +126,7 @@ namespace ClassicGuildBankData.Data
                 isBank = true,
                 BagSlots = new List<BagSlot>(),
                 BagContainerId = 5,
-                BagItem = _dbContext.Items.FirstOrDefault(i => i.Id == 17966)
+                ItemId = 17966
             };
 
             var backpack = new Bag
@@ -148,18 +148,12 @@ namespace ClassicGuildBankData.Data
 
 
             bank.BagSlots[0].ItemId = 14047;
-            bank.BagSlots[0].Item = _dbContext.Items.FirstOrDefault(i => i.Id == 14047);
             bank.BagSlots[1].ItemId = 13445;
-            bank.BagSlots[1].Item = _dbContext.Items.FirstOrDefault(i => i.Id == 13445);
             bank.BagSlots[4].ItemId = 7078;
-            bank.BagSlots[4].Item = _dbContext.Items.FirstOrDefault(i => i.Id == 7078);
 
             backpack.BagSlots[0].ItemId = 19019;
-            backpack.BagSlots[0].Item = _dbContext.Items.FirstOrDefault(i => i.Id == 19019);
             backpack.BagSlots[1].ItemId = 17182;
-            backpack.BagSlots[1].Item = _dbContext.Items.FirstOrDefault(i => i.Id == 17182);
 
-            bb1.BagSlots[0].Item = _dbContext.Items.FirstOrDefault(i => i.Id == 13457);
             bb1.BagSlots[0].ItemId = 13457;
 
             return new Character
@@ -192,6 +186,7 @@ namespace ClassicGuildBankData.Data
                 cmd.CommandTimeout = 300;
                 cmd.ExecuteNonQuery();
             }
+            connection.Close();
         }
         #endregion
     }
