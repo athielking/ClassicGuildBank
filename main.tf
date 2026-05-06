@@ -30,6 +30,9 @@ provider "cloudflare" {
 
 provider "azurerm" {
   features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }     
   }
 }
 
@@ -105,36 +108,6 @@ resource "azurerm_mssql_database" "db" {
   depends_on = [ azurerm_mssql_server.db_server ]
 }
 
-# resource "null_resource" "db_schema" {
-#   triggers = {
-#     sql_hash = filemd5("./ClassicGuildBankData/SQL/schema.sql")
-#   }
-#   provisioner "local-exec" {
-#     command = "${local.sqlcmd_base} -i ./ClassicGuildBankData/SQL/schema.sql"
-#   }
-#   depends_on = [azurerm_mssql_database.db]
-# }
-
-# resource "null_resource" "seed_items" {
-#   triggers = {
-#     sql_hash = filemd5("./ClassicGuildBankData/SQL/seed_items.sql")
-#   }
-#   provisioner "local-exec" {
-#     command = "${local.sqlcmd_base} -i ./ClassicGuildBankData/SQL/seed_items.sql"
-#   }
-#   depends_on = [null_resource.db_schema]
-# }
-
-# resource "null_resource" "seed_users" {
-#   triggers = {
-#     sql_hash = filemd5("./ClassicGuildBankData/SQL/seed_users.sql")
-#   }
-#   provisioner "local-exec" {
-#     command = "${local.sqlcmd_base} -i ./ClassicGuildBankData/SQL/seed_users.sql"
-#   }
-#   depends_on = [null_resource.seed_items]
-# }
-
 # Create the Azure App Service Plan
 resource "azurerm_service_plan" "app_sp" {
   name                = "${azurerm_resource_group.rg.name}-sp"
@@ -203,6 +176,8 @@ resource "aws_s3_bucket_public_access_block" "b" {
   block_public_policy = false
   block_public_acls   = true
   ignore_public_acls  = true
+
+  depends_on = [ aws_s3_bucket.b ]
 }
 
 data "aws_iam_policy_document" "policy" {
@@ -224,6 +199,8 @@ data "aws_iam_policy_document" "policy" {
 resource "aws_s3_bucket_policy" "bucket_policy" {
   bucket = aws_s3_bucket_website_configuration.bucket.id
   policy = data.aws_iam_policy_document.policy.json
+
+  depends_on = [ aws_s3_bucket.b, aws_s3_bucket_public_access_block.b ]
 }
 
 data "aws_acm_certificate" "cert" {
